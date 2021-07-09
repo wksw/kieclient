@@ -57,9 +57,9 @@ func TestGetAll(t *testing.T) {
 		t.Error(err.Error())
 		t.FailNow()
 	}
-	resp, err := client.GetAll(testProject, map[string]string{
+	resp, err := client.GetAll(testProject, "", "", -1, map[string]string{
 		"environment": "onebox",
-	}, -1, "")
+	})
 	if err != nil {
 		t.Error(err.Error())
 		t.FailNow()

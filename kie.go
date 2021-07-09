@@ -58,13 +58,18 @@ func (c Client) Get(project, kvID string) (*model.KVDoc, error) {
 }
 
 // GetAll 获取配置列表
-func (c Client) GetAll(project string, labels map[string]string, revision int, match string) (*model.KVResponse, error) {
+func (c Client) GetAll(project, key, match string, revision int, labels map[string]string) (*model.KVResponse, error) {
 	v := url.Values{}
 	for key := range labels {
 		v.Add("label", fmt.Sprintf("%s:%s", key, labels[key]))
 	}
 	v.Add("revision", fmt.Sprintf("%d", revision))
-	v.Add("match", match)
+	if match != "" {
+		v.Add("match", match)
+	}
+	if key != "" {
+		v.Add("key", key)
+	}
 	resp, err := c.do(http.MethodGet, fmt.Sprintf("/%s/kie/kv?%s", project, v.Encode()), nil)
 	if err != nil {
 		return &model.KVResponse{}, err
