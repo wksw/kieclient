@@ -19,6 +19,12 @@ type KVDoc struct {
 	Domain string            `json:"domain,omitempty" yaml:"domain,omitempty" validate:"commonName"`                              //redundant
 }
 
+// KVDocResp kvdoc返回
+type KVDocResp struct {
+	StatusCode int
+	Data       *KVDoc
+}
+
 //KVRequest is http request body
 type KVRequest struct {
 	Key       string            `json:"key" yaml:"key"`
@@ -30,9 +36,10 @@ type KVRequest struct {
 
 //KVResponse represents the key value list
 type KVResponse struct {
-	LabelDoc *LabelDocResponse `json:"label,omitempty"`
-	Total    int               `json:"total"`
-	Data     []*KVDoc          `json:"data"`
+	LabelDoc   *LabelDocResponse `json:"label,omitempty"`
+	Total      int               `json:"total"`
+	StatusCode int
+	Data       []*KVDoc `json:"data"`
 }
 
 //LabelDocResponse is label struct

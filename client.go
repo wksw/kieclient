@@ -40,6 +40,12 @@ type errResp struct {
 	ErrorMsg string `json:"error_msg"`
 }
 
+// Resp 请求返回
+type Resp struct {
+	StatusCode int
+	Data       []byte
+}
+
 // New 创建连接servicecomb-kie客户端
 func New(config Config) (Client, error) {
 	transport := &http.Transport{}
@@ -71,37 +77,49 @@ func New(config Config) (Client, error) {
 }
 
 // Do 发送http请求
-func (c Client) do(method, path string, body interface{}) ([]byte, error) {
+func (c Client) do(method, path string, body interface{}) (*Resp, error) {
 	uri, err := url.ParseRequestURI(c.config.Endpoint + c.config.ApiVersion + path)
 	if err != nil {
-		return nil, fmt.Errorf("parse request host and request path fail[%s]", err.Error())
+		return &Resp{
+			StatusCode: http.StatusBadRequest,
+		}, fmt.Errorf("parse request host and request path fail[%s]", err.Error())
 	}
 	var requestBody []byte
 	if body != nil {
 		bodyByte, err := json.Marshal(body)
 		if err != nil {
-			return nil, fmt.Errorf("marshal request body fail[%s]", err.Error())
+			return &Resp{
+				StatusCode: http.StatusInternalServerError,
+			}, fmt.Errorf("marshal request body fail[%s]", err.Error())
 		}
 		requestBody = bodyByte
 	}
 	req, err := http.NewRequest(method, uri.String(), bytes.NewReader(requestBody))
 	if err != nil {
-		return nil, fmt.Errorf("new request fail[%s]", err.Error())
+		return &Resp{
+			StatusCode: http.StatusInternalServerError,
+		}, fmt.Errorf("new request fail[%s]", err.Error())
 	}
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("request to remote fail[%s]", err.Error())
+		return &Resp{
+			StatusCode: http.StatusInternalServerError,
+		}, fmt.Errorf("request to remote fail[%s]", err.Error())
 	}
 	defer resp.Body.Close()
 	result, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("read response body fail[%s]", err.Error())
+		return &Resp{
+			StatusCode: http.StatusInternalServerError,
+		}, fmt.Errorf("read response body fail[%s]", err.Error())
 	}
 	if resp.StatusCode != http.StatusOK {
 		var eResp errResp
 		if err := json.Unmarshal(result, &eResp); err != nil {
-			return nil, fmt.Errorf("unmarshal response into errResp fail[%s]", err.Error())
+			return &Resp{
+				StatusCode: http.StatusInternalServerError,
+			}, fmt.Errorf("unmarshal response into errResp fail[%s]", err.Error())
 		}
 		err = errors.New(eResp.ErrorMsg)
 	}
@@ -129,5 +147,8 @@ func (c Client) do(method, path string, body interface{}) ([]byte, error) {
 		fmt.Println("--- END ---")
 	}
 
-	return result, err
+	return &Resp{
+		StatusCode: resp.StatusCode,
+		Data:       result,
+	}, err
 }

@@ -28,7 +28,7 @@ func TestCreate(t *testing.T) {
 		t.Error(err.Error())
 		t.FailNow()
 	}
-	if resp.Key != testKey && resp.Value != testValue {
+	if resp.Data.Key != testKey && resp.Data.Value != testValue {
 		t.Error(err.Error())
 		t.FailNow()
 	}
