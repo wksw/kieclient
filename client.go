@@ -114,7 +114,7 @@ func (c Client) do(method, path string, body interface{}) (*Resp, error) {
 			StatusCode: http.StatusInternalServerError,
 		}, fmt.Errorf("read response body fail[%s]", err.Error())
 	}
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		var eResp errResp
 		if err := json.Unmarshal(result, &eResp); err != nil {
 			return &Resp{
