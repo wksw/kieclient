@@ -2,8 +2,6 @@ package kieclient
 
 import (
 	"testing"
-
-	"github.com/apache/servicecomb-kie/pkg/model"
 )
 
 func newClient() (Client, error) {
@@ -19,7 +17,7 @@ func TestCreate(t *testing.T) {
 		t.Error(err.Error())
 		t.FailNow()
 	}
-	resp, err := client.Create(testProject, &model.KVRequest{
+	resp, err := client.Create(testProject, &KVRequest{
 		Key:   testKey,
 		Value: testValue,
 		Labels: map[string]string{
