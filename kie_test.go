@@ -11,6 +11,9 @@ func newClient() (Client, error) {
 
 }
 
+var createkeyId string = ""
+var existKeys []string = make([]string, 10)
+
 func TestCreate(t *testing.T) {
 	client, err := newClient()
 	if err != nil {
@@ -32,6 +35,21 @@ func TestCreate(t *testing.T) {
 		t.Error(err.Error())
 		t.FailNow()
 	}
+	createkeyId = resp.Data.ID
+	t.Log(resp.Data)
+}
+
+func TestGetWithNotExist(t *testing.T) {
+	client, err := newClient()
+	if err != nil {
+		t.Error(err.Error())
+		t.FailNow()
+	}
+	resp, err := client.Get(testProject, "notexist")
+	if err == nil {
+		t.Error("get an not exist key, but return success")
+		t.FailNow()
+	}
 	t.Log(resp)
 }
 
@@ -41,15 +59,19 @@ func TestGet(t *testing.T) {
 		t.Error(err.Error())
 		t.FailNow()
 	}
-	resp, err := client.Get(testProject, "not_exist")
-	if err == nil {
-		t.Error("get an not exist key, but return exist")
+	resp, err := client.Get(testProject, createkeyId)
+	if err != nil {
+		t.Error(err.Error())
 		t.FailNow()
 	}
-	t.Log(resp)
+	t.Log(resp.Data)
+	if resp.Data.Key != testKey && resp.Data.Value != testValue {
+		t.Error("get config not right")
+		t.FailNow()
+	}
 }
-
 func TestGetAll(t *testing.T) {
+	// TestCreate(t)
 	client, err := newClient()
 	if err != nil {
 		t.Error(err.Error())
@@ -68,5 +90,20 @@ func TestGetAll(t *testing.T) {
 	}
 	for _, data := range resp.Data {
 		t.Log(data.Key, "=", data.Value)
+		existKeys = append(existKeys, data.ID)
 	}
+}
+
+func TestDeleteKeys(t *testing.T) {
+	client, err := newClient()
+	if err != nil {
+		t.Error(err.Error())
+		t.FailNow()
+	}
+	resp, err := client.DeleteKeys(testProject, existKeys)
+	if err != nil {
+		t.Error(err.Error())
+		t.FailNow()
+	}
+	t.Log(resp.StatusCode)
 }

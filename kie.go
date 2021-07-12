@@ -60,6 +60,19 @@ func (c Client) Delete(project, kvID string) (*KVDocResp, error) {
 	}, nil
 }
 
+// DeleteKeys 删除所有配置
+func (c Client) DeleteKeys(project string, deleteIds []string) (*KVDocResp, error) {
+	resp, err := c.do(http.MethodDelete, fmt.Sprintf("/%s/kie/kv", project), &DeleteReq{IDs: deleteIds})
+	if err != nil {
+		return &KVDocResp{
+			StatusCode: resp.StatusCode,
+		}, err
+	}
+	return &KVDocResp{
+		StatusCode: resp.StatusCode,
+	}, nil
+}
+
 // Get 获取配置详情
 func (c Client) Get(project, kvID string) (*KVDocResp, error) {
 	resp, err := c.do(http.MethodGet, fmt.Sprintf("/%s/kie/kv/%s", project, kvID), nil)

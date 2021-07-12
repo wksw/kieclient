@@ -46,3 +46,8 @@ type KVResponse struct {
 type LabelDocResponse struct {
 	Labels map[string]string `json:"labels,omitempty"`
 }
+
+// DeleteReq 删除请求
+type DeleteReq struct {
+	IDs []string `json:"ids"`
+}
